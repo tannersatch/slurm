@@ -633,6 +633,7 @@ AC_CONFIG_FILES([Makefile
 		 src/plugins/task/cgroup/Makefile
 		 src/plugins/task/cray/Makefile
 		 src/plugins/task/none/Makefile
+       src/plugins/task/mount_isolation/Makefile
 		 src/plugins/topology/Makefile
 		 src/plugins/topology/3d_torus/Makefile
 		 src/plugins/topology/hypercube/Makefile

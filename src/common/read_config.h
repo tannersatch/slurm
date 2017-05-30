@@ -178,6 +178,8 @@ extern char *default_plugstack;
 #  define DEFAULT_SWITCH_TYPE         "switch/none"
 #endif
 #define DEFAULT_TASK_PLUGIN         "task/none"
+#define DEFAULT_TASK_PLUGIN_TMP_DIR    "/tmp"
+#define DEFAULT_TASK_PLUGIN_TMP_SUBDIR "mountns"
 #define DEFAULT_TCP_TIMEOUT         2
 #define DEFAULT_TMP_FS              "/tmp"
 #if defined HAVE_3D && !defined HAVE_ALPS_CRAY
