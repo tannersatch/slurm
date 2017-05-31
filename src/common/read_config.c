@@ -347,8 +347,8 @@ s_p_options_t slurm_conf_options[] = {
 	{"TaskEpilog", S_P_STRING},
 	{"TaskProlog", S_P_STRING},
 	{"TaskPlugin", S_P_STRING},
-   {"TaskPluginTmpDirs", S_P_STRING},
-   {"TaskPluginTmpSubdir", S_P_STRING},
+	{"TaskPluginTmpDirs", S_P_STRING},
+	{"TaskPluginTmpSubdir", S_P_STRING},
 	{"TaskPluginParam", S_P_STRING},
 	{"TCPTimeout", S_P_UINT16},
 	{"TmpFS", S_P_STRING},
@@ -2440,8 +2440,8 @@ free_slurm_conf (slurm_ctl_conf_t *ctl_conf_ptr, bool purge_node_hash)
 	xfree (ctl_conf_ptr->switch_type);
 	xfree (ctl_conf_ptr->task_epilog);
 	xfree (ctl_conf_ptr->task_plugin);
-   xfree (ctl_conf_ptr->task_plugin_tmp_dirs);
-   xfree (ctl_conf_ptr->task_plugin_tmp_subdir);
+	xfree (ctl_conf_ptr->task_plugin_tmp_dirs);
+	xfree (ctl_conf_ptr->task_plugin_tmp_subdir);
 	xfree (ctl_conf_ptr->task_prolog);
 	xfree (ctl_conf_ptr->tmp_fs);
 	xfree (ctl_conf_ptr->topology_param);
@@ -2617,8 +2617,8 @@ init_slurm_conf (slurm_ctl_conf_t *ctl_conf_ptr)
 	xfree (ctl_conf_ptr->switch_type);
 	xfree (ctl_conf_ptr->task_epilog);
 	xfree (ctl_conf_ptr->task_plugin);
-   xfree (ctl_conf_ptr->task_plugin_tmp_dirs);
-   xfree (ctl_conf_ptr->task_plugin_tmp_subdir);
+	xfree (ctl_conf_ptr->task_plugin_tmp_dirs);
+	xfree (ctl_conf_ptr->task_plugin_tmp_subdir);
 	ctl_conf_ptr->task_plugin_param		= 0;
 	xfree (ctl_conf_ptr->task_prolog);
 	ctl_conf_ptr->tcp_timeout		= (uint16_t) NO_VAL;
@@ -4220,11 +4220,11 @@ _validate_and_set_defaults(slurm_ctl_conf_t *conf, s_p_hashtbl_t *hashtbl)
 	}
 #endif
 
-   if (!s_p_get_string(&conf->task_plugin_tmp_dirs, "TaskPluginTmpDirs", hashtbl))
-      conf->task_plugin_tmp_dirs = xstrdup(DEFAULT_TASK_PLUGIN_TMP_DIR);
+	if (!s_p_get_string(&conf->task_plugin_tmp_dirs, "TaskPluginTmpDirs", hashtbl))
+		conf->task_plugin_tmp_dirs = xstrdup(DEFAULT_TASK_PLUGIN_TMP_DIR);
 
-   if (!s_p_get_string(&conf->task_plugin_tmp_subdir, "TaskPluginTmpSubdir", hashtbl))
-      conf->task_plugin_tmp_subdir = xstrdup(DEFAULT_TASK_PLUGIN_TMP_SUBDIR);
+	if (!s_p_get_string(&conf->task_plugin_tmp_subdir, "TaskPluginTmpSubdir", hashtbl))
+		conf->task_plugin_tmp_subdir = xstrdup(DEFAULT_TASK_PLUGIN_TMP_SUBDIR);
 
 	if (s_p_get_string(&temp_str, "TaskPluginParam", hashtbl)) {
 		char *last = NULL, *tok;

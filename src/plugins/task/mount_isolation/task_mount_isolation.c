@@ -300,7 +300,7 @@ static int _isolate(const stepd_step_rec_t *job) {
 		return SLURM_ERROR;
 	}
 
-	/* make root in the new namespace a slave so any changes don't propogate back to the default root */
+	/* make root in the new namespace a slave so any changes don't propagate back to the default root */
 	rc = mount("", "/", NULL, MS_REC|MS_SLAVE, NULL);
 	if (rc) {
 		slurm_error("%s: failed to 'mount --make-rslave /' for job: %u error: %u", plugin_name, job->jobid, rc);
@@ -312,7 +312,7 @@ static int _isolate(const stepd_step_rec_t *job) {
 	char* saveptr;
 	tmp_dir = strtok_r(tmp_dirs, ",", &saveptr);
 
-	/* look through tmp directories */
+	/* loop through tmp directories */
 	while (tmp_dir) {
 		/* set variables for loop */
 		char tmp_user_path[PATH_MAX];
@@ -400,7 +400,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 	}
 	list_iterator_destroy(itr);
 
-	/* If this is the last step in the job */
+	/* if this is the last step in the job */
 	if (job_step_cnt == 1) {
 		/* set necessary variables */
 		struct passwd pwd;
@@ -431,7 +431,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 		char* saveptr;
 		tmp_dir = strtok_r(tmp_dirs, ",", &saveptr);
 
-		/* look through tmp directories */
+		/* loop through tmp directories */
 		while (tmp_dir) {
 			/* set variables for loop */
 			char tmp_job_path[PATH_MAX];
@@ -454,7 +454,6 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 		}
 
 		/****** Begin Data Gathering ******/
-		debug3("%s: %ld bytes temporary files purged for jobid %u", plugin_name, bytes, job->jobid);
 		info("%s: %ld bytes temporary files purged for jobid %u", plugin_name, bytes, job->jobid);
 		/****** End Data Gathering ******/
 
@@ -505,7 +504,7 @@ static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) 
 							r2 = remove(buf);
 						}
 					} else {
-						/* Device ID has changed, return error without removing */
+						/* device ID has changed, return error without removing */
 						r2 = -1;
 					}
 				}
