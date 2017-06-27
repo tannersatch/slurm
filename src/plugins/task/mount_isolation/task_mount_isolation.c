@@ -130,11 +130,11 @@ extern int init (void) {
 		/* create tmp subdirectory */
 		rc = lstat(subdir_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create the %s temporary subdirectory. warning: %u (directory already exists)", plugin_name, tmp_subdir, rc);
+			debug3("%s: failed to create %s temporary subdirectory at %s. warning: %d (directory already exists)", plugin_name, tmp_subdir, subdir_path, rc);
 		} else {
 			rc = mkdir(subdir_path, 0000);
 			if (rc) {
-				slurm_error("%s: failed to create the %s temporary subdirectory. error: %u", plugin_name, tmp_subdir, rc);
+				slurm_error("%s: failed to create %s temporary subdirectory at %s. error: %d", plugin_name, tmp_subdir, subdir_path, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -149,7 +149,7 @@ extern int init (void) {
 	/* make the default root directory shared (by default it's private) */
 	rc = mount("", "/", NULL, MS_REC|MS_SHARED, NULL);
 	if (rc) {
-		slurm_error("%s: failed to 'mount --make-rshared /' error: %u", plugin_name, rc);
+		slurm_error("%s: failed to 'mount --make-rshared /' error: %d", plugin_name, rc);
 		return SLURM_ERROR;
 	}
 
@@ -282,7 +282,7 @@ static int _isolate(const stepd_step_rec_t *job) {
 	char pwbuffer[bufsize];
 	rc = getpwuid_r(job->uid, &pwd, pwbuffer, bufsize, &result);
 	if (rc) {
-		slurm_error("%s: failed to get username for job: %u error: %u", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to get username for job: %u error: %d", plugin_name, job->jobid, rc);
 		return SLURM_ERROR;
 	}
 	char* user = pwd.pw_name;
@@ -296,14 +296,14 @@ static int _isolate(const stepd_step_rec_t *job) {
 	/* create a new mount namespace */
 	rc = unshare(CLONE_NEWNS);
 	if (rc) {
-		slurm_error("%s: failed to unshare mounts for job: %u error: %u", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to unshare mounts for job: %u error: %d", plugin_name, job->jobid, rc);
 		return SLURM_ERROR;
 	}
 
 	/* make root in the new namespace a slave so any changes don't propagate back to the default root */
 	rc = mount("", "/", NULL, MS_REC|MS_SLAVE, NULL);
 	if (rc) {
-		slurm_error("%s: failed to 'mount --make-rslave /' for job: %u error: %u", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to 'mount --make-rslave /' for job: %u error: %d", plugin_name, job->jobid, rc);
 		return SLURM_ERROR;
 	}
 
@@ -324,11 +324,11 @@ static int _isolate(const stepd_step_rec_t *job) {
 		/* create user tmp directory */
 		rc = lstat(tmp_user_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create user directory for job: %u warning: %u (directory already exists)", plugin_name, job->jobid, rc);
+			debug3("%s: failed to create user directory %s for job: %u warning: %d (directory already exists)", plugin_name, tmp_user_path, job->jobid, rc);
 		} else {
 			rc = mkdir(tmp_user_path, 0700);
 			if (rc) {
-				slurm_error("%s: failed to create user directory for job: %u error: %u", plugin_name, job->jobid, rc);
+				slurm_error("%s: failed to create user directory %s for job: %u error: %d", plugin_name, tmp_user_path, job->jobid, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -336,18 +336,18 @@ static int _isolate(const stepd_step_rec_t *job) {
 		/* set permissions on user tmp directory */
 		rc = lchown(tmp_user_path, job->uid, job->gid);
 		if (rc) {
-			slurm_error("%s: failed to change ownership of user directory for job: %u error: %u", plugin_name, job->jobid, rc);
+			slurm_error("%s: failed to change ownership of user directory %s for job: %u error: %d", plugin_name, tmp_user_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 		
 		/* create job id tmp directory */
 		rc = lstat(tmp_job_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create jobid directory: %u warning: %u (directory already exists)", plugin_name, job->jobid, rc);
+			debug3("%s: failed to create jobid directory %s for job: %u warning: %d (directory already exists)", plugin_name, tmp_job_path, job->jobid, rc);
 		} else {
 			rc = mkdir(tmp_job_path, 0700);
 			if (rc) {
-				slurm_error("%s: failed to create jobid directory for job: %u error: %u", plugin_name, job->jobid, rc);
+				slurm_error("%s: failed to create jobid directory %s for job: %u error: %d", plugin_name, tmp_job_path, job->jobid, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -355,14 +355,14 @@ static int _isolate(const stepd_step_rec_t *job) {
 		/* set permissions on job id tmp directory */
 		rc = lchown(tmp_job_path, job->uid, job->gid);
 		if (rc) {
-			slurm_error("%s: failed to change ownership of jobid directory for job: %u error: %u", plugin_name, job->jobid, rc);
+			slurm_error("%s: failed to change ownership of jobid directory %s for job: %u error: %d", plugin_name, tmp_job_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 	
 		/* bind user and job id isolated directories to tmp directories */
 		rc = mount(tmp_job_path, tmp_dir, NULL, MS_BIND, NULL);
 		if (rc) {
-			slurm_error("%s: failed to mount jobid directory to %s for job: %u error: %u", plugin_name, tmp_dir, job->jobid, rc);
+			slurm_error("%s: failed to mount jobid directory %s to %s for job: %u error: %d", plugin_name, tmp_job_path, tmp_dir, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 
@@ -412,7 +412,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 		char pwbuffer[bufsize];
 		rc = getpwuid_r(job->uid, &pwd, pwbuffer, bufsize, &result);
 		if (rc) {
-			slurm_error("%s: failed to get username for job: %u error: %u", plugin_name, job->jobid, rc);
+			slurm_error("%s: failed to get username for job: %u error: %d", plugin_name, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 		char* user = pwd.pw_name;
@@ -442,7 +442,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 
 			rc = _remove_directory(tmp_job_path, &bytes, device_id);
 			if (rc) {
-				slurm_error("%s: failed to remove job related temporary files for job: %u error: %u", plugin_name, job->jobid, rc);
+				slurm_error("%s: failed to remove job related temporary files for job: %u error: %d", plugin_name, job->jobid, rc);
 				return SLURM_ERROR;
 			}
 

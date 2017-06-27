@@ -682,6 +682,8 @@ test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_affinity.so            &&
    echo %{_libdir}/slurm/task_affinity.so            >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_cgroup.so              &&
    echo %{_libdir}/slurm/task_cgroup.so              >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_mount_isolation.so     &&
+   echo %{_libdir}/slurm/task_mount_isolation.so     >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/job_container_cncu.so       &&
    echo %{_libdir}/slurm/job_container_cncu.so       >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/job_container_none.so       &&
