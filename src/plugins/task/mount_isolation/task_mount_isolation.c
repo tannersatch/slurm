@@ -127,6 +127,13 @@ extern int init (void) {
 		snprintf(subdir_path, PATH_MAX, "%s/%s", tmp_dir, tmp_subdir);
 		struct stat sb;
 
+		/* make the tmp directory private */
+		rc = mount("", tmp_dir, NULL, MS_PRIVATE, NULL);
+		if (rc) {
+			slurm_error("%s: failed to 'mount --make-private %s' error: %d", plugin_name, tmp_dir, rc);
+			return SLURM_ERROR;
+		}
+
 		/* create tmp subdirectory */
 		rc = lstat(subdir_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
@@ -144,13 +151,6 @@ extern int init (void) {
 		while (tmp_dir && *tmp_dir == '\040') {
 			tmp_dir++;
 		}
-	}
-
-	/* make the default root directory shared (by default it's private) */
-	rc = mount("", "/", NULL, MS_REC|MS_SHARED, NULL);
-	if (rc) {
-		slurm_error("%s: failed to 'mount --make-rshared /' error: %d", plugin_name, rc);
-		return SLURM_ERROR;
 	}
 
 	debug("%s loaded", plugin_name);
