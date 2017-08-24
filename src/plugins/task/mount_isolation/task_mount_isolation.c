@@ -1,6 +1,5 @@
 /*****************************************************************************\
- *  task_none.c - Library for task pre-launch and post_termination functions
- *	with no actions
+ *  task_mount_isolation.c - Create isolated namespaced directories per job
  *****************************************************************************
  *  Copyright (C) 2005-2007 The Regents of the University of California.
  *  Copyright (C) 2008 Lawrence Livermore National Security.
