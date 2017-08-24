@@ -87,6 +87,13 @@ of the Slurm contribs distribution follows:
      for and killed at job termination. See the README file in the subdirectory
      for more details.
 
+pam_mount_ns_adopt/  [ Plugin for PAM to place incoming connections into
+                       existing Slurm job mount namespace ]
+     This Slurm plugin provides a mechanisms for new incoming connections to
+     be placed into existing Slurm job mount namespaces so that users can view
+     temporary files as the job views them. It is meant to work with the Slurm
+     mount_isolation task plugin.
+
   perlapi/           [ Perl API to Slurm source ]
      API to Slurm using perl.  Making available all Slurm command that exist
      in the Slurm proper API.

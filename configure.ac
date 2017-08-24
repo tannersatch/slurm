@@ -421,6 +421,7 @@ AC_CONFIG_FILES([Makefile
 		 contribs/mic/Makefile
 		 contribs/pam/Makefile
 		 contribs/pam_slurm_adopt/Makefile
+       contribs/pam_mount_ns_adopt/Makefile
 		 contribs/perlapi/Makefile
 		 contribs/perlapi/libslurm/Makefile
 		 contribs/perlapi/libslurm/perl/Makefile.PL
