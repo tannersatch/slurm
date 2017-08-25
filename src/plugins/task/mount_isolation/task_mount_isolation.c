@@ -373,6 +373,8 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 	int job_step_cnt = 0;
 	int64_t bytes = 0;
 	char* nodename;
+	uid_t uid = -1;
+	int fd;
 
 	/* get the nodename */
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
@@ -385,16 +387,34 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 	/* count number of running steps for the job */
 	itr = list_iterator_create(steps);
 	while ((stepd = list_next(itr))) {
-		if (stepd->jobid == job->jobid) {
-			job_step_cnt++;
+		if (stepd->jobid != job->jobid) {
+			/* multiple jobs expected on shared nodes */
+			continue;
 		}
+		
+		/* count number of running steps for the job */
+		job_step_cnt++;
+
+		fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
+		if (fd == -1) {
+			debug3("%s: _job_cleanup unable to connect to step %u.%u", plugin_name, stepd->jobid, stepd->stepid);
+			continue;
+		}
+		uid = stepd_get_uid(fd, stepd->protocol_version);
+
+		close(fd);
+		if ((int)uid < 0) {
+			debug3("%s: _job_cleanup get uid failed %u.%u", plugin_name, stepd->jobid, stepd->stepid);
+			continue;
+		}
+		break;
 	}
 	list_iterator_destroy(itr);
 
 	/* if this is the last step in the job */
 	if (job_step_cnt == 1) {
 		/* set necessary variables */
-		char* user = uid_to_string(job->uid);
+		char* user = uid_to_string(uid);
 		struct stat sb;
 		/* used to ensure recursive remove stays on the same file system */
 		dev_t device_id;
