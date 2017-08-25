@@ -94,7 +94,7 @@ static int _isolate(const stepd_step_rec_t *job);
 /*
  * a function to cleanup no longer needed temporary files
  */
-static int _job_cleanup(const stepd_step_rec_t *job);
+static int _job_cleanup(const uint32_t job_id);
 
 /*
  * a function to recursively delete a non-empty directory
@@ -127,8 +127,19 @@ extern int init (void) {
 		/* make the tmp directory private */
 		rc = mount("", tmp_dir, NULL, MS_PRIVATE, NULL);
 		if (rc) {
-			slurm_error("%s: failed to 'mount --make-private %s' error: %d", plugin_name, tmp_dir, rc);
-			return SLURM_ERROR;
+			/* make sure the directory is mounted to itself */
+			rc = mount(tmp_dir, tmp_dir, NULL, MS_BIND, NULL);
+			if (rc) {
+				slurm_error("%s: failed to 'mount --bind %s %s' error: %d", plugin_name, tmp_dir, tmp_dir, rc);
+				return SLURM_ERROR;
+			}
+
+			/* try again */
+			rc = mount("", tmp_dir, NULL, MS_PRIVATE, NULL);
+			if (rc) {
+				slurm_error("%s: failed to 'mount --make-private %s' error: %d", plugin_name, tmp_dir, rc);
+				return SLURM_ERROR;
+			}
 		}
 
 		/* create tmp subdirectory */
@@ -207,6 +218,8 @@ extern int task_p_slurmd_resume_job (uint32_t job_id) {
  */
 extern int task_p_slurmd_release_resources (uint32_t job_id) {
 	debug("task_p_slurmd_release_resources: %u", job_id);
+	debug3("%s: in task_p_slurmd_release_resources for job: %u", plugin_name, job_id);
+	/* return _job_cleanup(job_id); */
 	return SLURM_SUCCESS;
 }
 
@@ -236,6 +249,7 @@ extern int task_p_pre_launch (stepd_step_rec_t *job) {
 extern int task_p_pre_launch_priv (stepd_step_rec_t *job) {
 	debug("task_p_pre_launch_priv: %u.%u", job->jobid, job->stepid);
 	return _isolate(job);
+	/* return SLURM_SUCCESS; */
 }
 
 /*
@@ -245,7 +259,8 @@ extern int task_p_pre_launch_priv (stepd_step_rec_t *job) {
  */
 extern int task_p_post_term (stepd_step_rec_t *job, stepd_step_task_info_t *task) {
 	debug("task_p_post_term: %u.%u, task %d", job->jobid, job->stepid, task->id);
-	return _job_cleanup(job);
+	return _job_cleanup(job->jobid);
+	/* return SLURM_SUCCESS; */
 }
 
 /*
@@ -365,7 +380,7 @@ static int _isolate(const stepd_step_rec_t *job) {
 /*
  * _job_cleanup() is called when a job terminates and calls _remove_directory() to remove temporary files related to the temrinated job
  */
-static int _job_cleanup(const stepd_step_rec_t *job) {
+static int _job_cleanup(const uint32_t job_id) {
 	int rc = 0;
 	ListIterator itr = NULL;
 	List steps = NULL;
@@ -378,16 +393,16 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 
 	/* get the nodename */
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
-		slurm_error("%s: failed to get nodename for job: %u error: %d", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to get nodename for job: %u error: %d", plugin_name, job_id, rc);
 		return SLURM_ERROR;
 	}
 
 	steps = stepd_available(NULL, nodename);
 
-	/* count number of running steps for the job */
+	/* count number of running steps for the job and get uid */
 	itr = list_iterator_create(steps);
 	while ((stepd = list_next(itr))) {
-		if (stepd->jobid != job->jobid) {
+		if (stepd->jobid != job_id) {
 			/* multiple jobs expected on shared nodes */
 			continue;
 		}
@@ -434,14 +449,14 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 		while (tmp_dir) {
 			/* set variables for loop */
 			char tmp_job_path[PATH_MAX];
-			snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d", tmp_dir, tmp_subdir, user, job->jobid);
+			snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d", tmp_dir, tmp_subdir, user, job_id);
 			if (!lstat(tmp_job_path, &sb)) {
 				device_id = sb.st_dev;
 			}
 
 			rc = _remove_directory(tmp_job_path, &bytes, device_id);
 			if (rc) {
-				slurm_error("%s: failed to remove job related temporary files for job: %u error: %d", plugin_name, job->jobid, rc);
+				slurm_error("%s: failed to remove job related temporary files for job: %u error: %d", plugin_name, job_id, rc);
 				return SLURM_ERROR;
 			}
 
@@ -453,7 +468,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 		}
 
 		/****** Begin Data Gathering ******/
-		info("%s: %ld bytes temporary files purged for jobid %u", plugin_name, bytes, job->jobid);
+		info("%s: %ld bytes temporary files purged for jobid %u", plugin_name, bytes, job_id);
 		/****** End Data Gathering ******/
 
 	}
