@@ -1,11 +1,9 @@
 /*****************************************************************************\
  *  task_mount_isolation.c - Create isolated namespaced directories per job
  *****************************************************************************
- *  Copyright (C) 2005-2007 The Regents of the University of California.
- *  Copyright (C) 2008 Lawrence Livermore National Security.
- *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
- *  Written by Morris Jette <jette1@llnl.gov>
- *  CODE-OCEC-09-009. All rights reserved.
+ *  Copyright (C) 2015, Brigham Young University
+ *  Author:  Tanner Satchwell <tannersatch@gmail.com>
+ *  Author:  Ryan Cox <ryan_cox@byu.edu>
  *
  *  This file is part of SLURM, a resource management program.
  *  For details, see <http://slurm.schedmd.com/>.
@@ -46,7 +44,6 @@
 #include <sched.h>
 #include <unistd.h>
 #include <sys/mount.h>
-#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,6 +56,7 @@
 #include "src/common/slurm_xlator.h"
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 #include "src/slurmd/slurmd/slurmd.h"
+#include "src/common/uid.c"
 
 /*
  * These variables are required by the generic plugin interface.  If they
@@ -272,19 +270,7 @@ extern int task_p_add_pid (pid_t pid) {
 static int _isolate(const stepd_step_rec_t *job) {
 	/* set variables for function */
 	int rc = 0;
-	struct passwd pwd;
-	struct passwd *result;
-	size_t bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (bufsize == -1) {
-		bufsize = 16384;
-	}
-	char pwbuffer[bufsize];
-	rc = getpwuid_r(job->uid, &pwd, pwbuffer, bufsize, &result);
-	if (rc) {
-		slurm_error("%s: failed to get username for job: %u error: %d", plugin_name, job->jobid, rc);
-		return SLURM_ERROR;
-	}
-	char* user = pwd.pw_name;
+	char* user = uid_to_string(job->uid);
 
 	/* retreive tmp directories and subdirectory from slurm.conf */
 	char tmp_dirs[PATH_MAX];
@@ -381,14 +367,20 @@ static int _isolate(const stepd_step_rec_t *job) {
  */
 static int _job_cleanup(const stepd_step_rec_t *job) {
 	int rc = 0;
-
 	ListIterator itr = NULL;
 	List steps = NULL;
 	step_loc_t *stepd = NULL;
 	int job_step_cnt = 0;
 	int64_t bytes = 0;
+	char* nodename;
 
-	steps = stepd_available(NULL, job->node_name);
+	/* get the nodename */
+	if (!(nodename = slurm_conf_get_aliased_nodename())) {
+		slurm_error("%s: failed to get nodename for job: %u error: %d", plugin_name, job->jobid, rc);
+		return SLURM_ERROR;
+	}
+
+	steps = stepd_available(NULL, nodename);
 
 	/* count number of running steps for the job */
 	itr = list_iterator_create(steps);
@@ -402,19 +394,7 @@ static int _job_cleanup(const stepd_step_rec_t *job) {
 	/* if this is the last step in the job */
 	if (job_step_cnt == 1) {
 		/* set necessary variables */
-		struct passwd pwd;
-		struct passwd *result;
-		size_t bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-		if (bufsize == -1) {
-			bufsize = 16384;
-		}
-		char pwbuffer[bufsize];
-		rc = getpwuid_r(job->uid, &pwd, pwbuffer, bufsize, &result);
-		if (rc) {
-			slurm_error("%s: failed to get username for job: %u error: %d", plugin_name, job->jobid, rc);
-			return SLURM_ERROR;
-		}
-		char* user = pwd.pw_name;
+		char* user = uid_to_string(job->uid);
 		struct stat sb;
 		/* used to ensure recursive remove stays on the same file system */
 		dev_t device_id;
