@@ -176,7 +176,8 @@ LTLIBRARIES = $(pkglib_LTLIBRARIES)
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_DEPENDENCIES =  \
 @HAVE_PAM_TRUE@	$(top_builddir)/src/api/libslurm.la
 am__pam_mount_ns_adopt_la_SOURCES_DIST = pam_mount_ns_adopt.c
-@HAVE_PAM_TRUE@am_pam_mount_ns_adopt_la_OBJECTS = pam_mount_ns_adopt.lo \
+@HAVE_PAM_TRUE@am_pam_mount_ns_adopt_la_OBJECTS =  \
+@HAVE_PAM_TRUE@	pam_mount_ns_adopt.lo
 am__EXTRA_pam_mount_ns_adopt_la_SOURCES_DIST = pam_mount_ns_adopt.c
 pam_mount_ns_adopt_la_OBJECTS = $(am_pam_mount_ns_adopt_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
