@@ -332,14 +332,14 @@ static int _isolate(const stepd_step_rec_t *job) {
 				return SLURM_ERROR;
 			}
 		}
-	
+
 		/* set permissions on user tmp directory */
 		rc = lchown(tmp_user_path, job->uid, job->gid);
 		if (rc) {
 			slurm_error("%s: failed to change ownership of user directory %s for job: %u error: %d", plugin_name, tmp_user_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
-		
+
 		/* create job id tmp directory */
 		rc = lstat(tmp_job_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
@@ -351,14 +351,14 @@ static int _isolate(const stepd_step_rec_t *job) {
 				return SLURM_ERROR;
 			}
 		}
-	
+
 		/* set permissions on job id tmp directory */
 		rc = lchown(tmp_job_path, job->uid, job->gid);
 		if (rc) {
 			slurm_error("%s: failed to change ownership of jobid directory %s for job: %u error: %d", plugin_name, tmp_job_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
-	
+
 		/* bind user and job id isolated directories to tmp directories */
 		rc = mount(tmp_job_path, tmp_dir, NULL, MS_BIND, NULL);
 		if (rc) {
@@ -406,7 +406,7 @@ static int _job_cleanup(const uint32_t job_id) {
 			/* multiple jobs expected on shared nodes */
 			continue;
 		}
-		
+
 		/* count number of running steps for the job */
 		job_step_cnt++;
 
@@ -422,7 +422,6 @@ static int _job_cleanup(const uint32_t job_id) {
 			debug3("%s: _job_cleanup get uid failed %u.%u", plugin_name, stepd->jobid, stepd->stepid);
 			continue;
 		}
-		break;
 	}
 	list_iterator_destroy(itr);
 
@@ -500,7 +499,7 @@ static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) 
 				continue;
 			}
 
-			len = path_len + strlen(p->d_name) + 2; 
+			len = path_len + strlen(p->d_name) + 2;
 			buf = xmalloc(len);
 
 			if (buf) {
@@ -543,8 +542,3 @@ static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) 
 
 	return r;
 }
-
-
-
-
-
