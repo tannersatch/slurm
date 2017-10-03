@@ -218,7 +218,6 @@ extern int task_p_slurmd_resume_job (uint32_t job_id) {
  */
 extern int task_p_slurmd_release_resources (uint32_t job_id) {
 	debug("task_p_slurmd_release_resources: %u", job_id);
-	debug3("%s: in task_p_slurmd_release_resources for job: %u", plugin_name, job_id);
 	/* return _job_cleanup(job_id); */
 	return SLURM_SUCCESS;
 }
@@ -381,6 +380,8 @@ static int _isolate(const stepd_step_rec_t *job) {
  * _job_cleanup() is called when a job terminates and calls _remove_directory() to remove temporary files related to the temrinated job
  */
 static int _job_cleanup(const uint32_t job_id) {
+	debug3("%s: beginning _job_cleanup", plugin_name);
+
 	int rc = 0;
 	ListIterator itr = NULL;
 	List steps = NULL;
@@ -406,6 +407,8 @@ static int _job_cleanup(const uint32_t job_id) {
 			/* multiple jobs expected on shared nodes */
 			continue;
 		}
+
+		debug3("%s: _job_cleanup step: %u:%u", plugin_name, stepd->jobid, stepd->stepid);
 
 		/* count number of running steps for the job */
 		job_step_cnt++;
@@ -479,6 +482,8 @@ static int _job_cleanup(const uint32_t job_id) {
  * _remove_directory() is called to recursively delete a non-empty directory
  */
 static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) {
+	debug3("%s: beginning _remove_directory", plugin_name);
+
 	/* declare needed variables */
 	DIR *d = opendir(path);
 	size_t path_len = strlen(path);
