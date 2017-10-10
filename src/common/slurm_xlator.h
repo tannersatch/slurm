@@ -111,10 +111,10 @@
 #define bit_copybits		slurm_bit_copybits
 
 /* fd.[ch] functions */
-// #define fd_read_n		slurm_fd_read_n
-// #define fd_write_n		slurm_fd_write_n
-// #define fd_set_blocking		slurm_fd_set_blocking
-// #define fd_set_nonblocking	slurm_fd_set_nonblocking
+#define fd_read_n		slurm_fd_read_n
+#define fd_write_n		slurm_fd_write_n
+#define fd_set_blocking		slurm_fd_set_blocking
+#define fd_set_nonblocking	slurm_fd_set_nonblocking
 
 /* hostlist.[ch] functions */
 #define	hostlist_create		slurm_hostlist_create
@@ -364,10 +364,10 @@
 #define plugrack_set_paranoia   slurm_plugrack_set_paranoia
 #define plugrack_use_by_type    slurm_plugrack_use_by_type
 
-// #define jobacctinfo_pack	slurm_jobacctinfo_pack
-// #define jobacctinfo_unpack	slurm_jobacctinfo_unpack
-// #define jobacctinfo_create      slurm_jobacctinfo_create
-// #define jobacctinfo_destroy     slurm_jobacctinfo_destroy
+#define jobacctinfo_pack	slurm_jobacctinfo_pack
+#define jobacctinfo_unpack	slurm_jobacctinfo_unpack
+#define jobacctinfo_create      slurm_jobacctinfo_create
+#define jobacctinfo_destroy     slurm_jobacctinfo_destroy
 
 /* node_select.[ch] functions */
 #define destroy_select_ba_request	slurm_destroy_select_ba_request
@@ -415,10 +415,10 @@
 #define callerid_get_own_netinfo	slurm_callerid_get_own_netinfo
 
 /* some stepd_api.[ch] functions */
-// #define stepd_available			slurm_stepd_available
-// #define stepd_connect			slurm_stepd_connect
-// #define stepd_get_uid			slurm_stepd_get_uid
-// #define stepd_add_extern_pid		slurm_stepd_add_extern_pid
+ #define stepd_available			slurm_stepd_available
+ #define stepd_connect			slurm_stepd_connect
+ #define stepd_get_uid			slurm_stepd_get_uid
+ #define stepd_add_extern_pid		slurm_stepd_add_extern_pid
 
 
 #endif /* USE_ALIAS */

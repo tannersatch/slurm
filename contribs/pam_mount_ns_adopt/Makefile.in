@@ -174,7 +174,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_DEPENDENCIES =  \
-@HAVE_PAM_TRUE@	$(top_builddir)/src/api/libslurm.la
+@HAVE_PAM_TRUE@	$(top_builddir)/src/api/libslurm.la \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/stepd_api.lo
 am__pam_mount_ns_adopt_la_SOURCES_DIST = pam_mount_ns_adopt.c
 @HAVE_PAM_TRUE@am_pam_mount_ns_adopt_la_OBJECTS =  \
 @HAVE_PAM_TRUE@	pam_mount_ns_adopt.lo
@@ -522,7 +523,10 @@ pkglib_LTLIBRARIES = $(pam_lib)
 @HAVE_PAM_TRUE@age = $(SLURM_API_AGE)
 @HAVE_PAM_TRUE@rev = $(SLURM_API_REVISION)
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_SOURCES = pam_mount_ns_adopt.c
-@HAVE_PAM_TRUE@pam_mount_ns_adopt_la_LIBADD = $(top_builddir)/src/api/libslurm.la
+@HAVE_PAM_TRUE@pam_mount_ns_adopt_la_LIBADD = \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/api/libslurm.la \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/stepd_api.lo -lm
+
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_LDFLAGS = $(SO_LDFLAGS) $(PLUGIN_FLAGS) $(LIB_LDFLAGS)
 #	Don't specify basename or version.map files in src/api will not be built
 #	@cd `dirname $@` && $(MAKE) `basename $@`

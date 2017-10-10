@@ -26,7 +26,9 @@ rev     = $(SLURM_API_REVISION)
 
 pam_mount_ns_adopt_la_SOURCES = pam_mount_ns_adopt.c
 
-pam_mount_ns_adopt_la_LIBADD = $(top_builddir)/src/api/libslurm.la
+pam_mount_ns_adopt_la_LIBADD = \
+  $(top_builddir)/src/api/libslurm.la \
+  $(top_builddir)/src/common/stepd_api.lo -lm
 
 pam_mount_ns_adopt_la_LDFLAGS = $(SO_LDFLAGS) $(PLUGIN_FLAGS) $(LIB_LDFLAGS)
 

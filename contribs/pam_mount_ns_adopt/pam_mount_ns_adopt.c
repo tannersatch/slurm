@@ -84,6 +84,9 @@
 
 #include "slurm/slurm.h"
 #include "src/common/slurm_xlator.h"
+#include "src/common/slurm_protocol_api.h"
+#include "src/common/xcgroup_read_config.c"
+#include "src/slurmd/common/xcgroup.c"
 #include "src/common/stepd_api.h" //c
 // #include "src/common/slurm_auth.c"
 // #include "src/common/fd.h" //c
