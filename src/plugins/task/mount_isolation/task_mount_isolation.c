@@ -408,12 +408,14 @@ static int _job_cleanup(const uint32_t job_id) {
 			continue;
 		}
 
-		debug3("%s: _job_cleanup step: %u:%u", plugin_name, stepd->jobid, stepd->stepid);
-
 		/* count number of running steps for the job */
-		job_step_cnt++;
+      if (stepd->stepid != SLURM_EXTERN_CONT) {
+         job_step_cnt++;
+      }
 
-		fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
+		debug3("%s: _job_cleanup step: %u:%u, step count: %d", plugin_name, stepd->jobid, stepd->stepid, job_step_cnt);
+
+      fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
 		if (fd == -1) {
 			debug3("%s: _job_cleanup unable to connect to step %u.%u", plugin_name, stepd->jobid, stepd->stepid);
 			continue;
