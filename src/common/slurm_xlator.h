@@ -415,10 +415,10 @@
 #define callerid_get_own_netinfo	slurm_callerid_get_own_netinfo
 
 /* some stepd_api.[ch] functions */
-#define stepd_available			slurm_stepd_available
-#define stepd_connect			slurm_stepd_connect
-#define stepd_get_uid			slurm_stepd_get_uid
-#define stepd_add_extern_pid		slurm_stepd_add_extern_pid
+ #define stepd_available			slurm_stepd_available
+ #define stepd_connect			slurm_stepd_connect
+ #define stepd_get_uid			slurm_stepd_get_uid
+ #define stepd_add_extern_pid		slurm_stepd_add_extern_pid
 
 
 #endif /* USE_ALIAS */
