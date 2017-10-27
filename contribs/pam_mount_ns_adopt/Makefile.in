@@ -175,7 +175,94 @@ am__installdirs = "$(DESTDIR)$(pkglibdir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_DEPENDENCIES =  \
 @HAVE_PAM_TRUE@	$(top_builddir)/src/api/libslurm.la \
-@HAVE_PAM_TRUE@	$(top_builddir)/src/common/stepd_api.lo
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/assoc_mgr.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/pack.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_protocol_api.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/bitstring.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/parse_config.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_protocol_defs.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/callerid.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/parse_time.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_protocol_pack.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/cbuf.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/parse_value.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_protocol_socket_implementation.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/checkpoint.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/plugin.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_protocol_util.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/cpu_frequency.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/plugrack.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_resource_info.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/daemonize.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/plugstack.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_rlimits_info.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/eio.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/power.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_route.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/entity.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/print_fields.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_selecttype_info.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/env.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/proc_args.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_step_layout.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/fd.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/read_config.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_time.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/forward.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/safeopen.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_topology.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/global_defaults.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_accounting_storage.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/stepd_api.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/gres.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_acct_gather_energy.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/strlcpy.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/hostlist.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_acct_gather_filesystem.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/strnatcmp.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/io_hdr.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_acct_gather_interconnect.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/switch.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/job_options.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_acct_gather.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/timers.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/job_resources.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_acct_gather_profile.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/uid.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/layout.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_auth.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/util-net.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/layouts_mgr.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_cred.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/working_cluster.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/list.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurmdbd_defs.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/write_labelled_message.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/log.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurmdb_defs.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xassert.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/mapping.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurmdb_pack.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/mpi.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_errno.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xhash.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/msg_aggr.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_ext_sensors.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xlua.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/net.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_jobacct_gather.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xmalloc.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/node_conf.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_jobcomp.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xsignal.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/node_features.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_mcs.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xstring.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/node_select.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_persist_conn.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/xtree.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/optz.lo \
+@HAVE_PAM_TRUE@	$(top_builddir)/src/common/slurm_priority.lo
 am__pam_mount_ns_adopt_la_SOURCES_DIST = pam_mount_ns_adopt.c
 @HAVE_PAM_TRUE@am_pam_mount_ns_adopt_la_OBJECTS =  \
 @HAVE_PAM_TRUE@	pam_mount_ns_adopt.lo
@@ -515,7 +602,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_CPPFLAGS = -fPIC -I$(top_srcdir) -I$(top_srcdir)/src/common
 # -DLIBSLURM_SO=\"$(libdir)/libslurm.so\"
-PLUGIN_FLAGS = -module --export-dynamic -avoid-version
+PLUGIN_FLAGS = -module -rdynamic --export-dynamic -avoid-version
 @HAVE_PAM_FALSE@pam_lib = 
 @HAVE_PAM_TRUE@pam_lib = pam_mount_ns_adopt.la
 pkglib_LTLIBRARIES = $(pam_lib)
@@ -525,7 +612,94 @@ pkglib_LTLIBRARIES = $(pam_lib)
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_SOURCES = pam_mount_ns_adopt.c
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_LIBADD = \
 @HAVE_PAM_TRUE@  $(top_builddir)/src/api/libslurm.la \
-@HAVE_PAM_TRUE@  $(top_builddir)/src/common/stepd_api.lo -lm
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/assoc_mgr.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/pack.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_protocol_api.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/bitstring.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/parse_config.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_protocol_defs.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/callerid.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/parse_time.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_protocol_pack.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/cbuf.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/parse_value.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_protocol_socket_implementation.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/checkpoint.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/plugin.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_protocol_util.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/cpu_frequency.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/plugrack.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_resource_info.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/daemonize.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/plugstack.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_rlimits_info.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/eio.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/power.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_route.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/entity.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/print_fields.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_selecttype_info.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/env.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/proc_args.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_step_layout.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/fd.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/read_config.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_time.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/forward.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/safeopen.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_topology.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/global_defaults.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_accounting_storage.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/stepd_api.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/gres.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_acct_gather_energy.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/strlcpy.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/hostlist.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_acct_gather_filesystem.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/strnatcmp.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/io_hdr.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_acct_gather_interconnect.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/switch.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/job_options.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_acct_gather.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/timers.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/job_resources.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_acct_gather_profile.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/uid.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/layout.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_auth.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/util-net.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/layouts_mgr.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_cred.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/working_cluster.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/list.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurmdbd_defs.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/write_labelled_message.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/log.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurmdb_defs.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xassert.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/mapping.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurmdb_pack.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/mpi.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_errno.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xhash.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/msg_aggr.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_ext_sensors.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xlua.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/net.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_jobacct_gather.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xmalloc.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/node_conf.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_jobcomp.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xsignal.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/node_features.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_mcs.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xstring.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/node_select.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_persist_conn.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/xtree.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/optz.lo -lm \
+@HAVE_PAM_TRUE@  $(top_builddir)/src/common/slurm_priority.lo -lm
 
 @HAVE_PAM_TRUE@pam_mount_ns_adopt_la_LDFLAGS = $(SO_LDFLAGS) $(PLUGIN_FLAGS) $(LIB_LDFLAGS)
 #	Don't specify basename or version.map files in src/api will not be built

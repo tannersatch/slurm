@@ -88,11 +88,11 @@
 #include "src/common/xcgroup_read_config.c"
 #include "src/slurmd/common/xcgroup.c"
 #include "src/common/stepd_api.h" //c
+// #include "src/common/slurm_jobacct_gather.h" //c
 // #include "src/common/slurm_auth.c"
 // #include "src/common/fd.h" //c
 // #include "src/common/xstring.h"
 // #include "src/common/slurm_acct_gather_profile.h" //c
-// #include "src/common/slurm_jobacct_gather.h" //c
 // #include "src/common/slurm_protocol_api.h"
 // #include "src/common/xcgroup_read_config.h"
 // #include "src/slurmd/common/xcgroup.h"
