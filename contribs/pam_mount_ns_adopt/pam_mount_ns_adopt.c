@@ -36,7 +36,7 @@
 
 
 #ifndef PAM_MODULE_NAME
-#  define PAM_MODULE_NAME "pam_mount_ns_adopt"
+#  define PAM_MODULE_NAME "pam PAM_MOUNT_NS_ADOPT"
 #endif
 
 #if HAVE_CONFIG_H
@@ -108,7 +108,7 @@
 
 PAM_EXTERN int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	debug3("%s: it's working!", PAM_MODULE_NAME);
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: beginning", PAM_MODULE_NAME);
 
 	/* declare needed variables */
 	uint16_t protocol_version;
@@ -125,14 +125,19 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	int fd2;
 	int i;
 
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring pid", PAM_MODULE_NAME);
 	/* get the pid of the connecting user, and find what jobs they are running */
 	user_pid = getpid();
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: user pid = %d", PAM_MODULE_NAME, user_pid);
 	rc = slurm_pid2jobid(user_pid, job_id);
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: slurm_pid2jobid rc = %d", PAM_MODULE_NAME, rc);
 	if (rc) {
 		error("%s: unable to get jobid", PAM_MODULE_NAME);
 		return (PAM_SUCCESS);
 	}
 
+
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring nodename", PAM_MODULE_NAME);
 	/* get the node name of the node the user is connecting to */
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
 		/* if no match, try localhost (Should only be
@@ -143,6 +148,8 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		}
 	}
 
+
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
 	/* connect to stepd to get job information */
 	fd1 = stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
 	if (fd1 == -1) {
@@ -155,6 +162,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		return (PAM_SUCCESS);
 	}
 
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: getting pids", PAM_MODULE_NAME);
 	/* get a list of job pids, just use the first pid that isn't the incoming connection */
 	stepd_list_pids(fd1, protocol_version, &pids, &count);
 	for (i =0; i < count; i++) {
@@ -164,9 +172,11 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		}
 	}
 
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: building mnt namespace path", PAM_MODULE_NAME);
 	/* prepare the path of the job mount ns */
 	snprintf(mountns, PATH_MAX, "/proc/%d/ns/mnt", job_pid);
 
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: opening mnt namespace", PAM_MODULE_NAME);
 	/* open and connect to the job mount ns */
 	fd2 = open(mountns, O_RDONLY);
 	if (fd2 == -1) {
@@ -176,6 +186,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		return (PAM_SUCCESS);
 	}
 
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: adopting user into mnt namespace", PAM_MODULE_NAME);
 	if (setns(fd2, 0) == -1) {
 		error("%s: setns failed to adopt user into jobid mnt ns", PAM_MODULE_NAME);
 		close(fd1);
