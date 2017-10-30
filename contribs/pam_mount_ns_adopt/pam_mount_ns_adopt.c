@@ -132,7 +132,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	rc = slurm_pid2jobid(user_pid, job_id);
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: slurm_pid2jobid rc = %d", PAM_MODULE_NAME, rc);
 	if (rc) {
-		error("%s: unable to get jobid", PAM_MODULE_NAME);
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to get jobid", PAM_MODULE_NAME);
 		return (PAM_SUCCESS);
 	}
 
@@ -143,7 +143,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		/* if no match, try localhost (Should only be
 		 * valid in a test environment) */
 		if (!(nodename = slurm_conf_get_nodename("localhost"))) {
-			error("%s: no hostname found", PAM_MODULE_NAME);
+			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: no hostname found", PAM_MODULE_NAME);
 			return (PAM_SUCCESS);
 		}
 	}
@@ -154,9 +154,9 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	fd1 = stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
 	if (fd1 == -1) {
 		if (errno == ENOENT) {
-			error("%s: job step %u.%u does not exist on this node.", PAM_MODULE_NAME, *job_id, step_id);
+			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job step %u.%u does not exist on this node.", PAM_MODULE_NAME, *job_id, step_id);
 		} else {
-			error("%s: unable to connect to slurmstepd", PAM_MODULE_NAME);
+			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to connect to slurmstepd", PAM_MODULE_NAME);
 		}
 		close(fd1);
 		return (PAM_SUCCESS);
@@ -180,7 +180,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	/* open and connect to the job mount ns */
 	fd2 = open(mountns, O_RDONLY);
 	if (fd2 == -1) {
-		error("%s: failed to open '/proc/PID/ns/mnt", PAM_MODULE_NAME);
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: failed to open '/proc/PID/ns/mnt", PAM_MODULE_NAME);
 		close(fd1);
 		close(fd2);
 		return (PAM_SUCCESS);
@@ -188,7 +188,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: adopting user into mnt namespace", PAM_MODULE_NAME);
 	if (setns(fd2, 0) == -1) {
-		error("%s: setns failed to adopt user into jobid mnt ns", PAM_MODULE_NAME);
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: setns failed to adopt user into jobid mnt ns", PAM_MODULE_NAME);
 		close(fd1);
 		close(fd2);
 		return (PAM_SUCCESS);
