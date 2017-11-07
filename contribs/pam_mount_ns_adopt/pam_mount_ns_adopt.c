@@ -66,91 +66,94 @@
 #include <sys/mount.h>
 #include <inttypes.h>
 
-// #define jobacctinfo_create      slurm_jobacctinfo_create
-// #define s_p_get_uint64		slurm_s_p_get_uint64
-// #define	_xstrfmtcat		slurm_xstrfmtcat
-// #define jobacctinfo_destroy     slurm_jobacctinfo_destroy
-// #define	debug			slurm_debug
-// #define	debug2			slurm_debug2
-// #define	debug3			slurm_debug3
-// #define	debug4			slurm_debug4
-// #define	list_create		slurm_list_create
-// #define	free_buf		slurm_free_buf
-// #define	xstrdup			slurm_xstrdup
-// #define jobacctinfo_pack	slurm_jobacctinfo_pack
-// #define _xstrcat		slurm_xstrcat
-// #define jobacctinfo_getinfo	slurm_jobacctinfo_getinfo
-// #define acct_gather_profile_timer slurm_acct_gather_profile_timer
-
 #include "slurm/slurm.h"
 #include "src/common/slurm_xlator.h"
 #include "src/common/slurm_protocol_api.h"
 #include "src/common/xcgroup_read_config.c"
 #include "src/slurmd/common/xcgroup.c"
-#include "src/common/stepd_api.h" //c
-// #include "src/common/slurm_jobacct_gather.h" //c
-// #include "src/common/slurm_auth.c"
-// #include "src/common/fd.h" //c
-// #include "src/common/xstring.h"
-// #include "src/common/slurm_acct_gather_profile.h" //c
-// #include "src/common/slurm_protocol_api.h"
-// #include "src/common/xcgroup_read_config.h"
-// #include "src/slurmd/common/xcgroup.h"
+#include "src/common/stepd_api.h"
 
 
 /**********************************\
  *  Session Management Functions  *
 \**********************************/
 
-// int
-// stepd_list_pids(int fd, uint16_t protocol_version,
-// 		uint32_t **pids_array, uint32_t *pids_count);
-
 PAM_EXTERN int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: beginning", PAM_MODULE_NAME);
-
 	/* declare needed variables */
 	uint16_t protocol_version;
-	char mountns[PATH_MAX];
-	uint32_t *pids = NULL;
-	char *nodename = NULL;
+	job_info_msg_t * job_ptr;
+	uint32_t * job_id = NULL;
+	uint32_t * pids = NULL;
 	uint32_t count = 0;
-	uint32_t *job_id = NULL;
-	int step_id = 0;
+	struct passwd * pw;
+	char mountns[PATH_MAX];
+	char * nodename = NULL;
+	char * user;
 	pid_t user_pid;
 	pid_t job_pid;
+	uid_t user_id;
+	void * dummy;
+	int step_id = 0;
 	int rc = 0;
 	int fd1;
 	int fd2;
 	int i;
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring pid", PAM_MODULE_NAME);
-	/* get the pid of the connecting user, and find what jobs they are running */
-	user_pid = getpid();
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: user pid = %d", PAM_MODULE_NAME, user_pid);
-	rc = slurm_pid2jobid(user_pid, job_id);
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: slurm_pid2jobid rc = %d", PAM_MODULE_NAME, rc);
-	if (rc) {
-		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to get jobid", PAM_MODULE_NAME);
-		return (PAM_SUCCESS);
+
+	/* get the user_id of the connecting user */
+	rc = pam_get_item(pamh, PAM_USER, (const void **) &dummy);
+	user = (char *) dummy;
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: getting uid for user %s", PAM_MODULE_NAME, user);
+	if ((rc != PAM_SUCCESS) || (user == NULL) || (*user == '\0')) {
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to identify user: %s", PAM_MODULE_NAME, pam_strerror(pamh, rc));
+		return(PAM_USER_UNKNOWN);
 	}
+	if (!(pw = getpwnam(user))) {
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: user %s does not exist", PAM_MODULE_NAME, user);
+		return(PAM_USER_UNKNOWN);
+	}
+	user_id = pw->pw_uid;
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: uid = %d", PAM_MODULE_NAME, user_id);
 
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring nodename", PAM_MODULE_NAME);
 	/* get the node name of the node the user is connecting to */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring nodename", PAM_MODULE_NAME);
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
-		/* if no match, try localhost (Should only be
-		 * valid in a test environment) */
+		/* if no match, try localhost (Should only be valid in a test environment) */
 		if (!(nodename = slurm_conf_get_nodename("localhost"))) {
 			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: no hostname found", PAM_MODULE_NAME);
 			return (PAM_SUCCESS);
 		}
 	}
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: nodename = %s", PAM_MODULE_NAME, nodename);
 
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
+	/* get the pid of the connecting user */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring pid", PAM_MODULE_NAME);
+	user_pid = getpid();
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: user pid = %d", PAM_MODULE_NAME, user_pid);
+
+
+	/* find a job id that the connecting user is running */
+	rc = slurm_load_job_user(&job_ptr, user_id, SHOW_ALL);
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: slurm_load_job_user rc = %d", PAM_MODULE_NAME, rc);
+	if (rc) {
+		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to get jobid", PAM_MODULE_NAME);
+		return (PAM_SUCCESS);
+	}
+	for (i = 0; i < job_ptr->record_count; i++) {
+		job_info_t *j = &job_ptr->job_array[i];
+		if (j->job_state == JOB_RUNNING) {
+			job_id = j->job_id;
+			break;
+		}
+	}
+	slurm_free_job_info_msg(job_ptr);
+
+
 	/* connect to stepd to get job information */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
 	fd1 = stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
 	if (fd1 == -1) {
 		if (errno == ENOENT) {
@@ -162,8 +165,8 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		return (PAM_SUCCESS);
 	}
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: getting pids", PAM_MODULE_NAME);
 	/* get a list of job pids, just use the first pid that isn't the incoming connection */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: getting pids", PAM_MODULE_NAME);
 	stepd_list_pids(fd1, protocol_version, &pids, &count);
 	for (i =0; i < count; i++) {
 		if (pids[i] != user_pid) {
@@ -172,12 +175,12 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		}
 	}
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: building mnt namespace path", PAM_MODULE_NAME);
 	/* prepare the path of the job mount ns */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: building mnt namespace path", PAM_MODULE_NAME);
 	snprintf(mountns, PATH_MAX, "/proc/%d/ns/mnt", job_pid);
 
-	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: opening mnt namespace", PAM_MODULE_NAME);
 	/* open and connect to the job mount ns */
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: opening mnt namespace", PAM_MODULE_NAME);
 	fd2 = open(mountns, O_RDONLY);
 	if (fd2 == -1) {
 		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: failed to open '/proc/PID/ns/mnt", PAM_MODULE_NAME);
@@ -186,6 +189,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		return (PAM_SUCCESS);
 	}
 
+	/* adopt the user into the job mnt namespace */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: adopting user into mnt namespace", PAM_MODULE_NAME);
 	if (setns(fd2, 0) == -1) {
 		syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: setns failed to adopt user into jobid mnt ns", PAM_MODULE_NAME);
