@@ -65,6 +65,7 @@
 #include <sched.h>
 #include <sys/mount.h>
 #include <inttypes.h>
+#include <dlfcn.h>
 
 #include "slurm/slurm.h"
 #include "src/common/slurm_xlator.h"
@@ -72,6 +73,27 @@
 #include "src/common/xcgroup_read_config.c"
 #include "src/slurmd/common/xcgroup.c"
 #include "src/common/stepd_api.h"
+
+
+/* Define the functions to be called before and after load since _init
+ * and _fini are obsolete, and their use can lead to unpredicatable
+ * results.
+ */
+void __attribute__ ((constructor)) libpam_slurm_init(void);
+void __attribute__ ((destructor)) libpam_slurm_fini(void);
+
+
+/*
+ *  Handle for libslurm.so
+ *
+ *  We open libslurm.so via dlopen () in order to pass the
+ *   flag RTDL_GLOBAL so that subsequently loaded modules have
+ *   access to libslurm symbols. This is pretty much only needed
+ *   for dynamically loaded modules that would otherwise be
+ *   linked against libslurm.
+ *
+ */
+static void * slurm_h = NULL;
 
 
 /**********************************\
@@ -100,7 +122,6 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	int fd2;
 	int i;
 
-
 	/* get the user_id of the connecting user */
 	rc = pam_get_item(pamh, PAM_USER, (const void **) &dummy);
 	user = (char *) dummy;
@@ -116,7 +137,6 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	user_id = pw->pw_uid;
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: uid = %d", PAM_MODULE_NAME, user_id);
 
-
 	/* get the node name of the node the user is connecting to */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring nodename", PAM_MODULE_NAME);
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
@@ -128,12 +148,10 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	}
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: nodename = %s", PAM_MODULE_NAME, nodename);
 
-
 	/* get the pid of the connecting user */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: acquiring pid", PAM_MODULE_NAME);
 	user_pid = getpid();
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: user pid = %d", PAM_MODULE_NAME, user_pid);
-
 
 	/* find a job id that the connecting user is running */
 	rc = slurm_load_job_user(&job_ptr, user_id, SHOW_ALL);
@@ -150,11 +168,11 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 		}
 	}
 	slurm_free_job_info_msg(job_ptr);
-
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job_id = %d", PAM_MODULE_NAME, job_id);
 
 	/* connect to stepd to get job information */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
-	fd1 = stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
+	fd1 = slurm_stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
 	if (fd1 == -1) {
 		if (errno == ENOENT) {
 			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job step %u.%u does not exist on this node.", PAM_MODULE_NAME, *job_id, step_id);
@@ -207,6 +225,124 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 PAM_EXTERN int
 pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char *argv[]) {
 	return (PAM_SUCCESS);
+}
+
+
+/* This function is necessary because libpam_slurm_init is called without access
+ * to the pam handle.
+ */
+static void
+_log_msg(int level, const char *format, ...)
+{
+	va_list args;
+
+	openlog(PAM_MODULE_NAME, LOG_CONS | LOG_PID, LOG_AUTHPRIV);
+	va_start(args, format);
+	vsyslog(level, format, args);
+	va_end(args);
+	closelog();
+	return;
+}
+
+
+/*
+ *  Sends a message to the application informing the user
+ *  that access was denied due to SLURM.
+ */
+extern void
+send_user_msg(pam_handle_t *pamh, const char *mesg)
+{
+	int retval;
+	struct pam_conv *conv;
+	void *dummy;    /* needed to eliminate warning:
+			 * dereferencing type-punned pointer will
+			 * break strict-aliasing rules */
+	char str[PAM_MAX_MSG_SIZE];
+	struct pam_message msg[1];
+	const struct pam_message *pmsg[1];
+	struct pam_response *prsp;
+
+	info("send_user_msg: %s", mesg);
+	/*  Get conversation function to talk with app.
+	 */
+	retval = pam_get_item(pamh, PAM_CONV, (const void **) &dummy);
+	conv = (struct pam_conv *) dummy;
+	if (retval != PAM_SUCCESS) {
+		_log_msg(LOG_ERR, "unable to get pam_conv: %s",
+			 pam_strerror(pamh, retval));
+		return;
+	}
+
+	/*  Construct msg to send to app.
+	 */
+	memcpy(str, mesg, sizeof(str));
+	msg[0].msg_style = PAM_ERROR_MSG;
+	msg[0].msg = str;
+	pmsg[0] = &msg[0];
+	prsp = NULL;
+
+	/*  Send msg to app and free the (meaningless) rsp.
+	 */
+	retval = conv->conv(1, pmsg, &prsp, conv->appdata_ptr);
+	if (retval != PAM_SUCCESS)
+		_log_msg(LOG_ERR, "unable to converse with app: %s",
+			 pam_strerror(pamh, retval));
+	if (prsp != NULL)
+		_pam_drop_reply(prsp, 1);
+
+	return;
+}
+
+/*
+ * Dynamically open system's libslurm.so with RTLD_GLOBAL flag.
+ *  This allows subsequently loaded modules access to libslurm symbols.
+ */
+extern void libpam_slurm_init (void)
+{
+	char libslurmname[64];
+
+	if (slurm_h)
+		return;
+
+	/* First try to use the same libslurm version ("libslurm.so.24.0.0"),
+	 * Second try to match the major version number ("libslurm.so.24"),
+	 * Otherwise use "libslurm.so" */
+	if (snprintf(libslurmname, sizeof(libslurmname),
+			"libslurm.so.%d.%d.%d", SLURM_API_CURRENT,
+			SLURM_API_REVISION, SLURM_API_AGE) >=
+			sizeof(libslurmname) ) {
+		_log_msg (LOG_ERR, "Unable to write libslurmname\n");
+	} else if ((slurm_h = dlopen(libslurmname, RTLD_NOW|RTLD_GLOBAL))) {
+		return;
+	} else {
+		_log_msg (LOG_INFO, "Unable to dlopen %s: %s\n",
+			libslurmname, dlerror ());
+	}
+
+	if (snprintf(libslurmname, sizeof(libslurmname), "libslurm.so.%d",
+			SLURM_API_CURRENT) >= sizeof(libslurmname) ) {
+		_log_msg (LOG_ERR, "Unable to write libslurmname\n");
+	} else if ((slurm_h = dlopen(libslurmname, RTLD_NOW|RTLD_GLOBAL))) {
+		return;
+	} else {
+		_log_msg (LOG_INFO, "Unable to dlopen %s: %s\n",
+			libslurmname, dlerror ());
+	}
+
+	if (!(slurm_h = dlopen("libslurm.so", RTLD_NOW|RTLD_GLOBAL))) {
+		_log_msg (LOG_ERR, "Unable to dlopen libslurm.so: %s\n",
+ 			  dlerror ());
+	}
+
+	return;
+}
+
+
+extern void libpam_slurm_fini (void)
+{
+ 	if (slurm_h)
+		dlclose (slurm_h);
+	return;
 }
 
 

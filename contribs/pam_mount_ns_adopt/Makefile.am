@@ -115,7 +115,9 @@ pam_mount_ns_adopt_la_LIBADD = \
   $(top_builddir)/src/common/slurm_persist_conn.lo \
   $(top_builddir)/src/common/xtree.lo \
   $(top_builddir)/src/common/optz.lo \
-  $(top_builddir)/src/common/slurm_priority.lo
+  $(top_builddir)/src/common/slurm_priority.lo \
+  $(top_builddir)/src/api/job_info.lo \
+  $(top_builddir)/src/api/federation_info.lo
 
 pam_mount_ns_adopt_la_LDFLAGS = $(SO_LDFLAGS) $(PLUGIN_FLAGS) $(LIB_LDFLAGS)
 
