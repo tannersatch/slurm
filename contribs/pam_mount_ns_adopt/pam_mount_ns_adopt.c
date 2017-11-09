@@ -105,8 +105,8 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	/* declare needed variables */
 	uint16_t protocol_version;
 	job_info_msg_t * job_ptr;
-	uint32_t * job_id = NULL;
 	uint32_t * pids = NULL;
+	uint32_t job_id = NULL;
 	uint32_t count = 0;
 	struct passwd * pw;
 	char mountns[PATH_MAX];
@@ -116,7 +116,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	pid_t job_pid;
 	uid_t user_id;
 	void * dummy;
-	int step_id = 0;
+	int step_id = SLURM_BATCH_SCRIPT;
 	int rc = 0;
 	int fd1;
 	int fd2;
@@ -172,10 +172,10 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 
 	/* connect to stepd to get job information */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
-	fd1 = slurm_stepd_connect(NULL, nodename, *job_id, step_id, &protocol_version);
+	fd1 = stepd_connect(NULL, nodename, job_id, step_id, &protocol_version);
 	if (fd1 == -1) {
 		if (errno == ENOENT) {
-			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job step %u.%u does not exist on this node.", PAM_MODULE_NAME, *job_id, step_id);
+			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job step %u.%u does not exist on this node.", PAM_MODULE_NAME, job_id, step_id);
 		} else {
 			syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: unable to connect to slurmstepd", PAM_MODULE_NAME);
 		}
