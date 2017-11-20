@@ -102,13 +102,21 @@ static void * slurm_h = NULL;
 
 PAM_EXTERN int
 pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+	/* check of slurm is running */
+	if (slurm_ping(1) != SLURM_SUCCESS) {
+		return(PAM_SUCCESS);
+	}
+
 	/* declare needed variables */
 	uint16_t protocol_version;
 	job_info_msg_t * job_ptr;
+	step_loc_t *stepd = NULL;
+	ListIterator itr = NULL;
 	uint32_t * pids = NULL;
-	uint32_t job_id = NULL;
+	uint32_t job_id = 0;
 	uint32_t count = 0;
 	struct passwd * pw;
+	List steps = NULL;
 	char mountns[PATH_MAX];
 	char * nodename = NULL;
 	char * user;
@@ -116,7 +124,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	pid_t job_pid;
 	uid_t user_id;
 	void * dummy;
-	int step_id = SLURM_BATCH_SCRIPT;
+	int step_id = 0;
 	int rc = 0;
 	int fd1;
 	int fd2;
@@ -170,6 +178,23 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	slurm_free_job_info_msg(job_ptr);
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: job_id = %d", PAM_MODULE_NAME, job_id);
 
+	/* find a stepid for the job */
+	steps = stepd_available(NULL, nodename);
+	itr = list_iterator_create(steps);
+	while ((stepd = list_next(itr))) {
+		if (stepd->jobid != job_id) {
+			/* multiple jobs expected on shared nodes */
+			continue;
+		}
+		if (stepd->stepid != SLURM_EXTERN_CONT) {
+			step_id = stepd->stepid;
+			break;
+		}
+	}
+	list_iterator_destroy(itr);
+	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: step_id = %d", PAM_MODULE_NAME, step_id);
+
+
 	/* connect to stepd to get job information */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: connecting to stepd", PAM_MODULE_NAME);
 	fd1 = stepd_connect(NULL, nodename, job_id, step_id, &protocol_version);
@@ -186,7 +211,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 	/* get a list of job pids, just use the first pid that isn't the incoming connection */
 	syslog(LOG_MAKEPRI(LOG_AUTH, LOG_INFO), "%s: getting pids", PAM_MODULE_NAME);
 	stepd_list_pids(fd1, protocol_version, &pids, &count);
-	for (i =0; i < count; i++) {
+	for (i = 0; i < count; i++) {
 		if (pids[i] != user_pid) {
 			job_pid = pids[i];
 			break;
@@ -331,7 +356,7 @@ extern void libpam_slurm_init (void)
 
 	if (!(slurm_h = dlopen("libslurm.so", RTLD_NOW|RTLD_GLOBAL))) {
 		_log_msg (LOG_ERR, "Unable to dlopen libslurm.so: %s\n",
- 			  dlerror ());
+			  dlerror ());
 	}
 
 	return;
@@ -340,7 +365,7 @@ extern void libpam_slurm_init (void)
 
 extern void libpam_slurm_fini (void)
 {
- 	if (slurm_h)
+	if (slurm_h)
 		dlclose (slurm_h);
 	return;
 }
