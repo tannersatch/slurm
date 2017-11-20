@@ -43,13 +43,6 @@
 #  include "config.h"
 #endif
 
-#define PATH_MAX 1024
-#include <security/_pam_macros.h>
-#include <security/pam_ext.h>
-#define PAM_SM_SESSION
-#include <security/pam_modules.h>
-#include <security/pam_modutil.h>
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
@@ -73,6 +66,16 @@
 #include "src/common/xcgroup_read_config.c"
 #include "src/slurmd/common/xcgroup.c"
 #include "src/common/stepd_api.h"
+
+#ifndef PATH_MAX
+#  define PATH_MAX 1024
+#endif
+
+#include <security/_pam_macros.h>
+#include <security/pam_ext.h>
+#define PAM_SM_SESSION
+#include <security/pam_modules.h>
+#include <security/pam_modutil.h>
 
 
 /* Define the functions to be called before and after load since _init
