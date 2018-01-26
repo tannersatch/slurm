@@ -24,7 +24,7 @@ current = $(SLURM_API_CURRENT)
 age     = $(SLURM_API_AGE)
 rev     = $(SLURM_API_REVISION)
 
-pam_mount_ns_adopt_la_SOURCES = pam_mount_ns_adopt.c
+pam_mount_ns_adopt_la_SOURCES = pam_mount_ns_adopt.c helper.c helper.h
 
 pam_mount_ns_adopt_la_LIBADD = \
   $(top_builddir)/src/api/libslurm.la \
