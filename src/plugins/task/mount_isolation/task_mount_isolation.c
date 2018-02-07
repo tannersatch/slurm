@@ -105,7 +105,8 @@ static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id);
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init (void) {
+extern int init (void)
+{
 	/* retreive tmp directories and subdirectory from slurm.conf */
 	char tmp_dirs[PATH_MAX];
 	snprintf(tmp_dirs, PATH_MAX, "%s", slurmctld_conf.task_plugin_tmp_dirs);
@@ -130,14 +131,16 @@ extern int init (void) {
 			/* make sure the directory is mounted to itself */
 			rc = mount(tmp_dir, tmp_dir, NULL, MS_BIND, NULL);
 			if (rc) {
-				slurm_error("%s: failed to 'mount --bind %s %s' error: %d", plugin_name, tmp_dir, tmp_dir, rc);
+				slurm_error("%s: failed to 'mount --bind %s %s' error: %d",
+						plugin_name, tmp_dir, tmp_dir, rc);
 				return SLURM_ERROR;
 			}
 
 			/* try again */
 			rc = mount("", tmp_dir, NULL, MS_PRIVATE, NULL);
 			if (rc) {
-				slurm_error("%s: failed to 'mount --make-private %s' error: %d", plugin_name, tmp_dir, rc);
+				slurm_error("%s: failed to 'mount --make-private %s' error: %d",
+						plugin_name, tmp_dir, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -145,11 +148,13 @@ extern int init (void) {
 		/* create tmp subdirectory */
 		rc = lstat(subdir_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create %s temporary subdirectory at %s. warning: %d (directory already exists)", plugin_name, tmp_subdir, subdir_path, rc);
+			debug3("%s: failed to create %s temporary subdirectory at %s. warning: %d (directory already exists)",
+					plugin_name, tmp_subdir, subdir_path, rc);
 		} else {
 			rc = mkdir(subdir_path, 0000);
 			if (rc) {
-				slurm_error("%s: failed to create %s temporary subdirectory at %s. error: %d", plugin_name, tmp_subdir, subdir_path, rc);
+				slurm_error("%s: failed to create %s temporary subdirectory at %s. error: %d",
+						plugin_name, tmp_subdir, subdir_path, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -169,14 +174,17 @@ extern int init (void) {
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini (void) {
+extern int fini (void)
+{
 	return SLURM_SUCCESS;
 }
 
 /*
  * task_p_slurmd_batch_request()
  */
-extern int task_p_slurmd_batch_request (uint32_t job_id, batch_job_launch_msg_t *req) {
+extern int task_p_slurmd_batch_request (uint32_t job_id,
+					batch_job_launch_msg_t *req)
+{
 	debug("task_p_slurmd_batch_request: %u", job_id);
 	return SLURM_SUCCESS;
 }
@@ -184,15 +192,22 @@ extern int task_p_slurmd_batch_request (uint32_t job_id, batch_job_launch_msg_t 
 /*
  * task_p_slurmd_launch_request()
  */
-extern int task_p_slurmd_launch_request (uint32_t job_id, launch_tasks_request_msg_t *req, uint32_t node_id) {
-	debug("task_p_slurmd_launch_request: %u.%u %u", job_id, req->job_step_id, node_id);
+extern int task_p_slurmd_launch_request (uint32_t job_id,
+					launch_tasks_request_msg_t *req,
+					uint32_t node_id)
+{
+	debug("task_p_slurmd_launch_request: %u.%u %u",
+			job_id, req->job_step_id, node_id);
 	return SLURM_SUCCESS;
 }
 
 /*
  * task_p_slurmd_reserve_resources()
  */
-extern int task_p_slurmd_reserve_resources (uint32_t job_id, launch_tasks_request_msg_t *req, uint32_t node_id) {
+extern int task_p_slurmd_reserve_resources (uint32_t job_id,
+					launch_tasks_request_msg_t *req,
+					uint32_t node_id)
+{
 	debug("task_p_slurmd_reserve_resources: %u %u", job_id, node_id);
 	return SLURM_SUCCESS;
 }
@@ -200,7 +215,8 @@ extern int task_p_slurmd_reserve_resources (uint32_t job_id, launch_tasks_reques
 /*
  * task_p_slurmd_suspend_job()
  */
-extern int task_p_slurmd_suspend_job (uint32_t job_id) {
+extern int task_p_slurmd_suspend_job (uint32_t job_id)
+{
 	debug("task_p_slurmd_suspend_job: %u", job_id);
 	return SLURM_SUCCESS;
 }
@@ -208,7 +224,8 @@ extern int task_p_slurmd_suspend_job (uint32_t job_id) {
 /*
  * task_p_slurmd_resume_job()
  */
-extern int task_p_slurmd_resume_job (uint32_t job_id) {
+extern int task_p_slurmd_resume_job (uint32_t job_id)
+{
 	debug("task_p_slurmd_resume_job: %u", job_id);
 	return SLURM_SUCCESS;
 }
@@ -216,7 +233,8 @@ extern int task_p_slurmd_resume_job (uint32_t job_id) {
 /*
  * task_p_slurmd_release_resources()
  */
-extern int task_p_slurmd_release_resources (uint32_t job_id) {
+extern int task_p_slurmd_release_resources (uint32_t job_id)
+{
 	debug("task_p_slurmd_release_resources: %u", job_id);
 	/* return _job_cleanup(job_id); */
 	return SLURM_SUCCESS;
@@ -227,7 +245,8 @@ extern int task_p_slurmd_release_resources (uint32_t job_id) {
  * user to launch his jobs. Use this to create the CPUSET directory
  * and set the owner appropriately.
  */
-extern int task_p_pre_setuid (stepd_step_rec_t *job) {
+extern int task_p_pre_setuid (stepd_step_rec_t *job)
+{
 	return SLURM_SUCCESS;
 }
 
@@ -236,8 +255,10 @@ extern int task_p_pre_setuid (stepd_step_rec_t *job) {
  *	It is followed by TaskProlog program (from slurm.conf) and
  *	--task-prolog (from srun command line).
  */
-extern int task_p_pre_launch (stepd_step_rec_t *job) {
-	debug("task_p_pre_launch: %u.%u, task %d", job->jobid, job->stepid, job->envtp->procid);
+extern int task_p_pre_launch (stepd_step_rec_t *job)
+{
+	debug("task_p_pre_launch: %u.%u, task %d",
+			job->jobid, job->stepid, job->envtp->procid);
 	return SLURM_SUCCESS;
 }
 
@@ -245,8 +266,10 @@ extern int task_p_pre_launch (stepd_step_rec_t *job) {
  * task_p_pre_launch_priv() is called prior to exec of application task.
  * in privileged mode, just after slurm_spank_task_init_privileged
  */
-extern int task_p_pre_launch_priv (stepd_step_rec_t *job) {
-	debug("task_p_pre_launch_priv: %u.%u", job->jobid, job->stepid);
+extern int task_p_pre_launch_priv (stepd_step_rec_t *job)
+{
+	debug("task_p_pre_launch_priv: %u.%u",
+			job->jobid, job->stepid);
 	return _isolate(job);
 	/* return SLURM_SUCCESS; */
 }
@@ -256,8 +279,10 @@ extern int task_p_pre_launch_priv (stepd_step_rec_t *job) {
  *	It is preceded by --task-epilog (from srun command line)
  *	followed by TaskEpilog program (from slurm.conf).
  */
-extern int task_p_post_term (stepd_step_rec_t *job, stepd_step_task_info_t *task) {
-	debug("task_p_post_term: %u.%u, task %d", job->jobid, job->stepid, task->id);
+extern int task_p_post_term (stepd_step_rec_t *job, stepd_step_task_info_t *task)
+{
+	debug("task_p_post_term: %u.%u, task %d",
+			job->jobid, job->stepid, task->id);
 	return _job_cleanup(job->jobid);
 	/* return SLURM_SUCCESS; */
 }
@@ -266,14 +291,16 @@ extern int task_p_post_term (stepd_step_rec_t *job, stepd_step_task_info_t *task
  * task_p_post_step() is called after termination of the step
  * (all the task)
  */
-extern int task_p_post_step (stepd_step_rec_t *job) {
+extern int task_p_post_step (stepd_step_rec_t *job)
+{
 	return SLURM_SUCCESS;
 }
 
 /*
  * Keep track a of a pid.
  */
-extern int task_p_add_pid (pid_t pid) {
+extern int task_p_add_pid (pid_t pid)
+{
 	return SLURM_SUCCESS;
 }
 
@@ -281,7 +308,8 @@ extern int task_p_add_pid (pid_t pid) {
 /*
  * _isolate() is called from task_p_pre_launch_priv to setup mount namespace isolation
  */
-static int _isolate(const stepd_step_rec_t *job) {
+static int _isolate(const stepd_step_rec_t *job)
+{
 	/* set variables for function */
 	int rc = 0;
 	char* user = uid_to_string(job->uid);
@@ -295,14 +323,17 @@ static int _isolate(const stepd_step_rec_t *job) {
 	/* create a new mount namespace */
 	rc = unshare(CLONE_NEWNS);
 	if (rc) {
-		slurm_error("%s: failed to unshare mounts for job: %u error: %d", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to unshare mounts for job: %u error: %d",
+				plugin_name, job->jobid, rc);
 		return SLURM_ERROR;
 	}
 
-	/* make root in the new namespace a slave so any changes don't propagate back to the default root */
+	/* make root in the new namespace a slave so any changes don't propagate
+	 * back to the default root */
 	rc = mount("", "/", NULL, MS_REC|MS_SLAVE, NULL);
 	if (rc) {
-		slurm_error("%s: failed to 'mount --make-rslave /' for job: %u error: %d", plugin_name, job->jobid, rc);
+		slurm_error("%s: failed to 'mount --make-rslave /' for job: %u error: %d",
+				plugin_name, job->jobid, rc);
 		return SLURM_ERROR;
 	}
 
@@ -315,19 +346,23 @@ static int _isolate(const stepd_step_rec_t *job) {
 	while (tmp_dir) {
 		/* set variables for loop */
 		char tmp_user_path[PATH_MAX];
-		snprintf(tmp_user_path, PATH_MAX, "%s/%s/%s", tmp_dir, tmp_subdir, user);
+		snprintf(tmp_user_path, PATH_MAX, "%s/%s/%s",
+				tmp_dir, tmp_subdir, user);
 		char tmp_job_path[PATH_MAX];
-		snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d", tmp_dir, tmp_subdir, user, job->jobid);
+		snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d",
+				tmp_dir, tmp_subdir, user, job->jobid);
 		struct stat sb;
 
 		/* create user tmp directory */
 		rc = lstat(tmp_user_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create user directory %s for job: %u warning: %d (directory already exists)", plugin_name, tmp_user_path, job->jobid, rc);
+			debug3("%s: failed to create user directory %s for job: %u warning: %d (directory already exists)",
+					plugin_name, tmp_user_path, job->jobid, rc);
 		} else {
 			rc = mkdir(tmp_user_path, 0700);
 			if (rc) {
-				slurm_error("%s: failed to create user directory %s for job: %u error: %d", plugin_name, tmp_user_path, job->jobid, rc);
+				slurm_error("%s: failed to create user directory %s for job: %u error: %d",
+						plugin_name, tmp_user_path, job->jobid, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -335,18 +370,21 @@ static int _isolate(const stepd_step_rec_t *job) {
 		/* set permissions on user tmp directory */
 		rc = lchown(tmp_user_path, job->uid, job->gid);
 		if (rc) {
-			slurm_error("%s: failed to change ownership of user directory %s for job: %u error: %d", plugin_name, tmp_user_path, job->jobid, rc);
+			slurm_error("%s: failed to change ownership of user directory %s for job: %u error: %d",
+					plugin_name, tmp_user_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 
 		/* create job id tmp directory */
 		rc = lstat(tmp_job_path, &sb);
 		if (rc == 0 && S_ISDIR(sb.st_mode)) {
-			debug3("%s: failed to create jobid directory %s for job: %u warning: %d (directory already exists)", plugin_name, tmp_job_path, job->jobid, rc);
+			debug3("%s: failed to create jobid directory %s for job: %u warning: %d (directory already exists)",
+					plugin_name, tmp_job_path, job->jobid, rc);
 		} else {
 			rc = mkdir(tmp_job_path, 0700);
 			if (rc) {
-				slurm_error("%s: failed to create jobid directory %s for job: %u error: %d", plugin_name, tmp_job_path, job->jobid, rc);
+				slurm_error("%s: failed to create jobid directory %s for job: %u error: %d",
+						plugin_name, tmp_job_path, job->jobid, rc);
 				return SLURM_ERROR;
 			}
 		}
@@ -354,14 +392,16 @@ static int _isolate(const stepd_step_rec_t *job) {
 		/* set permissions on job id tmp directory */
 		rc = lchown(tmp_job_path, job->uid, job->gid);
 		if (rc) {
-			slurm_error("%s: failed to change ownership of jobid directory %s for job: %u error: %d", plugin_name, tmp_job_path, job->jobid, rc);
+			slurm_error("%s: failed to change ownership of jobid directory %s for job: %u error: %d",
+					plugin_name, tmp_job_path, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 
 		/* bind user and job id isolated directories to tmp directories */
 		rc = mount(tmp_job_path, tmp_dir, NULL, MS_BIND, NULL);
 		if (rc) {
-			slurm_error("%s: failed to mount jobid directory %s to %s for job: %u error: %d", plugin_name, tmp_job_path, tmp_dir, job->jobid, rc);
+			slurm_error("%s: failed to mount jobid directory %s to %s for job: %u error: %d",
+					plugin_name, tmp_job_path, tmp_dir, job->jobid, rc);
 			return SLURM_ERROR;
 		}
 
@@ -377,11 +417,11 @@ static int _isolate(const stepd_step_rec_t *job) {
 }
 
 /*
- * _job_cleanup() is called when a job terminates and calls _remove_directory() to remove temporary files related to the temrinated job
+ * _job_cleanup() is called when a job terminates and calls _remove_directory()
+ * to remove temporary files related to the temrinated job
  */
-static int _job_cleanup(const uint32_t job_id) {
-	debug3("%s: beginning _job_cleanup", plugin_name);
-
+static int _job_cleanup(const uint32_t job_id)
+{
 	int rc = 0;
 	ListIterator itr = NULL;
 	List steps = NULL;
@@ -394,7 +434,8 @@ static int _job_cleanup(const uint32_t job_id) {
 
 	/* get the nodename */
 	if (!(nodename = slurm_conf_get_aliased_nodename())) {
-		slurm_error("%s: failed to get nodename for job: %u error: %d", plugin_name, job_id, rc);
+		slurm_error("%s: failed to get nodename for job: %u error: %d",
+				plugin_name, job_id, rc);
 		return SLURM_ERROR;
 	}
 
@@ -413,18 +454,22 @@ static int _job_cleanup(const uint32_t job_id) {
          job_step_cnt++;
       }
 
-		debug3("%s: _job_cleanup step: %u:%u, step count: %d", plugin_name, stepd->jobid, stepd->stepid, job_step_cnt);
+		debug3("%s: _job_cleanup step: %u:%u, step count: %d",
+				plugin_name, stepd->jobid, stepd->stepid, job_step_cnt);
 
-      fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
+      fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid,
+		  		stepd->stepid, &stepd->protocol_version);
 		if (fd == -1) {
-			debug3("%s: _job_cleanup unable to connect to step %u.%u", plugin_name, stepd->jobid, stepd->stepid);
+			debug3("%s: _job_cleanup unable to connect to step %u.%u",
+					plugin_name, stepd->jobid, stepd->stepid);
 			continue;
 		}
 		uid = stepd_get_uid(fd, stepd->protocol_version);
 
 		close(fd);
 		if ((int)uid < 0) {
-			debug3("%s: _job_cleanup get uid failed %u.%u", plugin_name, stepd->jobid, stepd->stepid);
+			debug3("%s: _job_cleanup get uid failed %u.%u",
+					plugin_name, stepd->jobid, stepd->stepid);
 			continue;
 		}
 	}
@@ -442,7 +487,8 @@ static int _job_cleanup(const uint32_t job_id) {
 		char tmp_dirs[PATH_MAX];
 		snprintf(tmp_dirs, PATH_MAX, "%s", slurmctld_conf.task_plugin_tmp_dirs);
 		char tmp_subdir[PATH_MAX];
-		snprintf(tmp_subdir, PATH_MAX, "%s", slurmctld_conf.task_plugin_tmp_subdir);
+		snprintf(tmp_subdir, PATH_MAX, "%s",
+				slurmctld_conf.task_plugin_tmp_subdir);
 
 		/* prepare to loop through tmp directories */
 		char* tmp_dir;
@@ -453,14 +499,16 @@ static int _job_cleanup(const uint32_t job_id) {
 		while (tmp_dir) {
 			/* set variables for loop */
 			char tmp_job_path[PATH_MAX];
-			snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d", tmp_dir, tmp_subdir, user, job_id);
+			snprintf(tmp_job_path, PATH_MAX, "%s/%s/%s/%d",
+					tmp_dir, tmp_subdir, user, job_id);
 			if (!lstat(tmp_job_path, &sb)) {
 				device_id = sb.st_dev;
 			}
 
 			rc = _remove_directory(tmp_job_path, &bytes, device_id);
 			if (rc) {
-				slurm_error("%s: failed to remove job related temporary files for job: %u error: %d", plugin_name, job_id, rc);
+				slurm_error("%s: failed to remove job related temporary files for job: %u error: %d",
+						plugin_name, job_id, rc);
 				return SLURM_ERROR;
 			}
 
@@ -472,7 +520,8 @@ static int _job_cleanup(const uint32_t job_id) {
 		}
 
 		/****** Begin Data Gathering ******/
-		info("%s: %ld bytes temporary files purged for jobid %u", plugin_name, bytes, job_id);
+		info("%s: %ld bytes temporary files purged for jobid %u",
+				plugin_name, bytes, job_id);
 		/****** End Data Gathering ******/
 
 	}
@@ -483,9 +532,8 @@ static int _job_cleanup(const uint32_t job_id) {
 /*
  * _remove_directory() is called to recursively delete a non-empty directory
  */
-static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) {
-	debug3("%s: beginning _remove_directory", plugin_name);
-
+static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id)
+{
 	/* declare needed variables */
 	DIR *d = opendir(path);
 	size_t path_len = strlen(path);
@@ -501,7 +549,7 @@ static int _remove_directory(const char *path, int64_t *bytes, dev_t device_id) 
 			char *buf;
 			size_t len;
 
-			/* skip the names "." and ".." as we don't want to recurse on them. */
+			/* skip the names "." and ".." we don't want to recurse on them. */
 			if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) {
 				continue;
 			}
